@@ -4,23 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.time.Instant;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
 class AccessTokenAuthenticationFailureHandler implements AuthenticationFailureHandler {
-
-  @Override
-  public void onAuthenticationFailure(HttpServletRequest request,
-      HttpServletResponse response,
-      AuthenticationException e) throws IOException {
-
-    response.setStatus(HttpStatus.UNAUTHORIZED.value());
-    response.setContentType("application/json;charset=UTF-8");
-    response.getWriter().write(createErrorBody(e));
-  }
 
   private String createErrorBody(AuthenticationException exception) {
     JsonObject exceptionMessage = new JsonObject();
@@ -29,5 +17,14 @@ class AccessTokenAuthenticationFailureHandler implements AuthenticationFailureHa
     exceptionMessage.addProperty("timestamp", Instant.now().toString());
     exceptionMessage.addProperty("message", exception.getMessage());
     return new Gson().toJson(exceptionMessage);
+  }
+
+  @Override
+  public void onAuthenticationFailure(jakarta.servlet.http.HttpServletRequest request,
+      jakarta.servlet.http.HttpServletResponse response, AuthenticationException exception)
+      throws IOException {
+    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    response.setContentType("application/json;charset=UTF-8");
+    response.getWriter().write(createErrorBody(exception));
   }
 }

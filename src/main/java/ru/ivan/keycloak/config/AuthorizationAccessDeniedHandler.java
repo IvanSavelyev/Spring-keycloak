@@ -4,22 +4,11 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.time.Instant;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 public class AuthorizationAccessDeniedHandler implements AccessDeniedHandler {
-
-  @Override
-  public void handle(HttpServletRequest request, HttpServletResponse response,
-      AccessDeniedException accessDeniedException) throws IOException {
-
-    response.setStatus(HttpStatus.FORBIDDEN.value());
-    response.setContentType("application/json;charset=UTF-8");
-    response.getWriter().write(createErrorBody(accessDeniedException));
-  }
 
   private String createErrorBody(AccessDeniedException exception) {
     JsonObject exceptionMessage = new JsonObject();
@@ -28,5 +17,14 @@ public class AuthorizationAccessDeniedHandler implements AccessDeniedHandler {
     exceptionMessage.addProperty("timestamp", Instant.now().toString());
     exceptionMessage.addProperty("message", exception.getMessage());
     return new Gson().toJson(exceptionMessage);
+  }
+
+  @Override
+  public void handle(jakarta.servlet.http.HttpServletRequest request,
+      jakarta.servlet.http.HttpServletResponse response,
+      AccessDeniedException accessDeniedException) throws IOException {
+    response.setStatus(HttpStatus.FORBIDDEN.value());
+    response.setContentType("application/json;charset=UTF-8");
+    response.getWriter().write(createErrorBody(accessDeniedException));
   }
 }

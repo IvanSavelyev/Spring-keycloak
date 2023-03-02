@@ -14,6 +14,22 @@ spring:
       #  http://docs.jboss.org/hibernate/orm/5.3/userguide/html_single/Hibernate_User_Guide.html#configurations
       hibernate:
         format_sql: true
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: login-app
+            authorization-grant-type: authorization_code
+            scope: openid
+        provider:
+          keycloak:
+            user-name-attribute: preferred_username
+            issuer-uri: ${keycloak.url}/auth/realms/${keycloak.realm}
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.url}/auth/realms/${keycloak.realm}
+          jwk-set-uri: ${keycloak.url}/auth/realms/${keycloak.realm}/protocol/openid-connect/certs
 
 server:
   port: 9000

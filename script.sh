@@ -12,7 +12,7 @@ KEYCLOAK_REALM=test
 # -d "password=${KEYCLOAK_CLIENT_SECRET}" \
 # -d "grant_type=password" \
 # -d "client_id=login-app" | jq -r ".access_token")
-#
+
 #echo "$TKN"
 
 #curl -H "Authorization: Bearer $TKN" http://localhost:9000/api/products
@@ -57,4 +57,4 @@ TKN=$(curl -X POST "${KEYCLOAK_URL}/${KEYCLOAK_REALM}/protocol/openid-connect/to
 #-H "Authorization: Bearer $TKN" \
 #-d '{"title":"updatedTitle"}'
 
-#curl -H "Authorization: Bearer $TKN" -X DELETE http://localhost:9000/api/products/1
+curl -H "Authorization: Bearer $TKN" -X DELETE http://localhost:9000/api/products/1

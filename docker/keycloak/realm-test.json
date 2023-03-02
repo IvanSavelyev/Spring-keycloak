@@ -52,24 +52,6 @@
         "attributes": {}
       },
       {
-        "id": "e7821add-b5a3-43dd-83fc-1a78a701dcd4",
-        "name": "VISITOR",
-        "description": "A person who only wants to see the content",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "test",
-        "attributes": {}
-      },
-      {
-        "id": "6ebcac27-aec2-4af3-b540-13e6966bc515",
-        "name": "ADMIN",
-        "description": "Master of all data, can see & change everything",
-        "composite": false,
-        "clientRole": false,
-        "containerId": "test",
-        "attributes": {}
-      },
-      {
         "id": "1d2cd1eb-f72c-431d-8f02-082623f8f088",
         "name": "uma_authorization",
         "description": "${role_uma_authorization}",

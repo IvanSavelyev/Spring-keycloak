@@ -1,85 +1,50 @@
 package ru.ivan.keycloak.config;
 
-import com.auth0.jwk.JwkProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.annotation.Order;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import ru.ivan.keycloak.JwtTokenValidator;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtValidators;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.web.SecurityFilterChain;
+import ru.ivan.keycloak.model.Role;
 
-@Order(1)
-@EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableWebSecurity
+@Configuration
+public class SecurityConfig {
 
-  @Value("${keycloak.jwk}")
-  private String jwkProviderUrl;
-
-  @Override
-  protected void configure(HttpSecurity http) throws Exception {
-    http
-        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .csrf().disable()
-        .cors()
-        .and()
-        .exceptionHandling()
-        .accessDeniedHandler(accessDeniedHandler())
-        .and()
-        .addFilterBefore(
-            new AccessTokenFilter(
-                jwtTokenValidator(keycloakJwkProvider()),
-                authenticationManagerBean(),
-                authenticationFailureHandler()),
-            BasicAuthenticationFilter.class);
-  }
-
-  @SuppressWarnings("EmptyMethod")
-  @ConditionalOnMissingBean
   @Bean
-  @Override
-  public AuthenticationManager authenticationManagerBean() throws Exception {
-    return super.authenticationManagerBean();
-  }
+  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-  @Override
-  public void configure(AuthenticationManagerBuilder auth) {
-    auth.authenticationProvider(authenticationProvider());
+    http.authorizeHttpRequests(authz -> authz
+        .requestMatchers(HttpMethod.PUT, "/api/**").hasAuthority(Role.MODERATOR.name())
+        .requestMatchers(HttpMethod.POST, "/api/**").hasAuthority(Role.MODERATOR.name())
+        .requestMatchers(HttpMethod.DELETE, "/api/**").hasAuthority(Role.MODERATOR.name())
+        .requestMatchers("/api/**").authenticated()
+        .anyRequest().permitAll()
+    );
+    http.oauth2ResourceServer()
+        .jwt()
+        .jwtAuthenticationConverter(new CustomJwtAuthenticationConverter());
+    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    http.cors();
+    http.csrf().disable();
+    return http.build();
   }
 
   @Bean
-  public AuthenticationProvider authenticationProvider() {
-    return new KeycloakAuthenticationProvider();
-  }
-
-  @Bean
-  public AuthenticationFailureHandler authenticationFailureHandler() {
-    return new AccessTokenAuthenticationFailureHandler();
-  }
-
-  @Bean
-  public JwtTokenValidator jwtTokenValidator(JwkProvider jwkProvider) {
-    return new JwtTokenValidator(jwkProvider);
-  }
-
-  @Bean
-  public JwkProvider keycloakJwkProvider() {
-    return new KeycloakJwkProvider(jwkProviderUrl);
-  }
-
-  @Bean
-  public AccessDeniedHandler accessDeniedHandler() {
-    return new AuthorizationAccessDeniedHandler();
+  public JwtDecoder jwtDecoder(OAuth2ResourceServerProperties oAuth2ResourceServerProperties) {
+    NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(
+        oAuth2ResourceServerProperties.getJwt().getJwkSetUri()).build();
+    jwtDecoder.setJwtValidator(
+        JwtValidators.createDefaultWithIssuer(
+            oAuth2ResourceServerProperties.getJwt().getIssuerUri()));
+    return jwtDecoder;
   }
 }
