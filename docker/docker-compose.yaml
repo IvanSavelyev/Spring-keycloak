@@ -1,0 +1,50 @@
+services:
+
+  application:
+    build: ..
+    container_name: application
+    ports:
+      - "5005:5005"
+      - "9000:9000"
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: test
+    depends_on:
+      - keycloak
+
+  keycloak:
+    image: jboss/keycloak:11.0.2
+    container_name: keycloak
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: password
+      DB_VENDOR: postgres
+      DB_ADDR: postgres
+      DB_PORT: 5432
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak
+      KEYCLOAK_IMPORT: /tmp/realm-test.json
+    volumes:
+      - ./keycloak/realm-test.json:/tmp/realm-test.json
+    command: [ "-Dkeycloak.profile.feature.upload_scripts=enabled" ]
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:13.0-alpine
+    restart: 'always'
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DB: keycloak
+      POSTGRES_HOST: postgres
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      timeout: 5s
+      interval: 10s
+      retries: 1
