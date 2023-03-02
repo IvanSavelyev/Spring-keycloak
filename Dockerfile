@@ -8,7 +8,7 @@ RUN mvn -f pom.xml clean package -DskipTests
 FROM openjdk:17-alpine
 COPY --from=build /workspace/target/*.jar app.jar
 
-ENV APP_OPTS="\-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+ENV APP_OPTS="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 EXPOSE 9000
 #ENTRYPOINT ["java","-jar","app.jar"]
 CMD "$JAVA_HOME/bin/java" $APP_OPTS \
