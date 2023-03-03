@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.ivan.keycloak.annotation.AllowedRoles;
 import ru.ivan.keycloak.model.Product;
+import ru.ivan.keycloak.model.Role;
 import ru.ivan.keycloak.repository.ProductRepository;
 import ru.ivan.keycloak.util.ValidationUtil;
 
@@ -33,21 +34,21 @@ public class ProductController {
   private final ProductRepository productRepository;
 
   @GetMapping
-  @AllowedRoles({"MODERATOR", "USER"})
+  @AllowedRoles({Role.MODERATOR, Role.USER})
   public List<Product> getAll() {
     log.info("getAll");
     return productRepository.findAll();
   }
 
   @GetMapping("/{id}")
-  @AllowedRoles({"MODERATOR", "USER"})
+  @AllowedRoles({Role.MODERATOR, Role.USER})
   public ResponseEntity<Product> get(@PathVariable int id) {
     log.info("get {}", id);
     return ResponseEntity.of(productRepository.findById(id));
   }
 
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-  @AllowedRoles("MODERATOR")
+  @AllowedRoles(Role.MODERATOR)
   public ResponseEntity<Product> createWithLocation(@Valid @RequestBody Product product) {
     log.info("create {}", product);
     ValidationUtil.checkNew(product);
@@ -60,7 +61,7 @@ public class ProductController {
 
   @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @AllowedRoles("MODERATOR")
+  @AllowedRoles(Role.MODERATOR)
   public void update(@Valid @RequestBody Product product, @PathVariable int id) {
     log.info("update {} with id={}", product, id);
     ValidationUtil.assureIdConsistent(product, id);
@@ -69,7 +70,7 @@ public class ProductController {
 
   @DeleteMapping("/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  @AllowedRoles("MODERATOR")
+  @AllowedRoles(Role.MODERATOR)
   public void delete(@PathVariable int id) {
     log.info("delete {}", id);
     productRepository.deleteById(id);

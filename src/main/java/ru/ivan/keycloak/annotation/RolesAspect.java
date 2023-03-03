@@ -20,8 +20,8 @@ public class RolesAspect {
   @Before("@annotation(ru.ivan.keycloak.annotation.AllowedRoles)")
   public void before(JoinPoint joinPoint) {
 
-    var expectedRoles = ((MethodSignature) joinPoint.getSignature()).getMethod()
-        .getAnnotation(AllowedRoles.class).value();
+    var expectedRoles = Arrays.stream(((MethodSignature) joinPoint.getSignature()).getMethod()
+        .getAnnotation(AllowedRoles.class).value()).map(Enum::name).toList();
 
     var grantedAuthorities =
         Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
@@ -32,10 +32,10 @@ public class RolesAspect {
         .map(GrantedAuthority::getAuthority)
         .toList();
 
-    if (!CollectionUtils.containsAny(roles, Arrays.asList(expectedRoles))) {
+    if (!CollectionUtils.containsAny(expectedRoles, roles)) {
       throw new AccessDeniedException(
           String.format("Unauthorized request. Expected to have %s roles, but have %s",
-              Arrays.asList(expectedRoles), roles));
+              expectedRoles, roles));
     }
   }
 }
