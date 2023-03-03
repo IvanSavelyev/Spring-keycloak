@@ -1,5 +1,7 @@
 # Spring keycloak
-
+## !!FOR THIS BRANCH RUN SPRING BOOT APP OUT OF CONTAINER!!
+## !!IN CONTAINER CONNECTION FOR JWK REFUSED!!
+#### (https://stackoverflow.com/questions/71483036/how-i-can-get-keycloak-realm-certs-using-spring-boot-application-in-docker-conta)
 Test spring boot project with keycloak (authorization server).
 
 ## Start
