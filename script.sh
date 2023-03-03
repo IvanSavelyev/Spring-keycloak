@@ -24,7 +24,7 @@ KEYCLOAK_REALM=test
 #-H "Authorization: Bearer $TKN" \
 #-d '{"title":"updatedTitle"}'
 
-#curl -X PUT http://localhost:9000/api/products  \
+#curl -X PUT http://localhost:9000/api/products/1  \
 #-H "Content-Type: application/json" \
 #-H "Authorization: Bearer $TKN" \
 #-d '{"title":"updatedTitle"}'
